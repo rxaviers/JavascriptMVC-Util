@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Content Hash</title>
+</head>
+<body>
+  <div id="body">
+    <ul>
+      <li><a id="a" href="#">A</a></li>
+      <li><a id="b" href="#">B</a></li>
+      <li><a id="c" href="#">C</a></li>
+    </ul>
+    <div id="container"></div>
+  </div>
+  <script type='text/javascript' src='../../steal/steal.js?plugins/content_hash'></script>
+  <script type='text/javascript'>
+    $(document).ready(function() {
+      $("#content").css({
+        'border':'1px solid #000',
+        'width':'600px',
+        'height':'400px'
+      });
+      $('#container').content_hash();
+      $('#container').trigger('set', ['a', $("<div>a</div>")]);
+      $('#container').trigger('set', ['b', $("<div>b</div>")]);
+      $('#container').trigger('set', ['c', $("<div>c</div>")]);
+      $('ul a').click(function(ev) {
+        $('#container').trigger('show', [this.id]);
+        ev.preventDefault();
+      });
+    });
+  </script>
+</body>
+</html>
