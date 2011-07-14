@@ -1,0 +1,19 @@
+.util_tabs {padding:0px; margin:0px;}
+.util_tabs li {display:inline-block; list-style:none;}
+.util_tabs li a {text-decoration:none;}
+.util_tabs li.active a {cursor:default;}
+
+/* clearfix from jQueryUI */
+.ui-helper-clearfix:after {
+  content:".";
+  display:block;
+  height:0;
+  clear:both;
+  visibility:hidden;
+}
+.ui-helper-clearfix {display:inline-block;}
+
+/* required comment for clearfix to work in Opera */
+* html .ui-helper-clearfix {height:1%;}
+.ui-helper-clearfix {display:block;}
+

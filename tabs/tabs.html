@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+            "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+	<head>
+		<title>util.tabs</title>
+		<style>
+			.tab {
+				border: solid 1px black;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Util.Tabs</h1>
+		<p>A very basic tabs widget that creates 'activate' events.</p>
+		<h2>Demo</h2>
+		<p>Click the different tabs.</p>
+	    <ul id='resultsTab'>
+			<li><a href='#sales'>Sales</a></li>
+			<li><a href='#nav'>Navigate</a></li>
+			<li><a href='#basket'>Basket</a></li>
+		</ul>
+
+		<div id='sales' class='tab'>Here is the daily sales.</div>
+		<div id='nav' class='tab'>Here is the list of all items.</div>
+		<div id='basket' class='tab'>Here is your basket.</div>
+
+		
+		<script type='text/javascript' 
+                src='../../steal/steal.js?util/tabs'>
+        </script>
+		
+		<script type='text/javascript' >
+				
+			$('#resultsTab').util_tabs();
+			
+		</script>
+		
+	</body>
+</html>
