@@ -1,2 +1,7 @@
-<div class="<%= name %>_"><form><button class="<%= name %>" type="button" data-corner="4px keep"><span><%= content %></span></button></form></div>
-
+<%if(form){%>
+<form>
+<%}%>
+<button type="button" data-corner="4px keep"><span><%= content %></span></button>
+<%if(form){%>
+</form>
+<%}%>

@@ -13,6 +13,7 @@ $.Controller.extend('Super.Button',
    * 
    */
   defaults: {
+    form: true
   }
 },
 /* @prototype */
@@ -22,14 +23,11 @@ $.Controller.extend('Super.Button',
    */
   init: function(el, options) {
     var content = this.element.html(),
-        name = this.element.attr('class'),
-        el = $(this.view({content:content, name:name}));
+        el = $(this.view($.extend(this.options, {content:content})));
 
-    this.element
-      .after(el)
-      .remove();
+    this.element.html(el);
 
-    el.find('button').corner();
+    this.find('button').corner();
   }
 }
 );
