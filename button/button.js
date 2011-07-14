@@ -3,10 +3,10 @@ steal.plugins(
   'jquery/view/ejs',
   'jquery/controller/view')
   .views(
-    '//super/button/views/init.ejs')
+    '//util/button/views/init.ejs')
   .then(function() {
 
-$.Controller.extend('Super.Button',
+$.Controller.extend('Util.Button',
 /* @static */
 {
   /**
