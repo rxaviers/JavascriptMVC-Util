@@ -65,7 +65,8 @@ $.Controller.extend('ContentStack',
    */
   content_ready: function() {
     var stats = this.content_stats[this.content_stats.length - 1];
-    this.element.trigger(this.options.ready_ev, [stats]);
+    this.element.children(':last-child')
+      .trigger(this.options.ready_ev, [stats]);
   }
 }
 );
