@@ -17,19 +17,29 @@ $.Controller.extend('ImageStack',
    * 
    * listener_area_mult:        x times of imgs.height
    * 
+   * semi_circular: {           Semi Circular specific parameters
+   *   radium:                    x times of imgs.height
+   * }
+   * 
    * grid: {                    Grid specific parameters
    *   grid_spacing:              in pixels, default 20.
    *   rows:                      n rows, default 2
-   *}
+   * }
+   *
+   * margin:                    in pixels, margin from document
    */
   defaults: {
     animation: 'grid',                        // animation type
     angle_delta: 30,                          // in degrees
     listener_area_mult: 2.2,                  // x times of imgs.height
+    semi_circular: {                          // semi_circular specific parameters
+      radium: 1.15                            // x times of imgs.height
+    },
     grid: {                                   // grid specific parameters
       grid_spacing: 20,                       // in pixels
       rows: 2                                 // n rows
-    }
+    },
+    margin: 10                                // in pixels, margin from document
   }
 },
 /* @prototype */
@@ -38,22 +48,45 @@ $.Controller.extend('ImageStack',
    *
    */
   init: function(el, options) {
-    var i, r;
-
     this.imgs = this.find('img');
     this.num = this.imgs.length;
-    this.initial_angle = [];
-
-    // Set initial angle
-    for(i=0; i<this.num; i++) {
-      r = Math.floor((Math.random() - 0.5) * this.options.angle_delta);
-      this.initial_angle[i] = r;
-    }
+    this.initial = {}
+    this.initial.angle = [];
+    this.initial.x = [];
+    this.initial.y = [];
+    this.initial.offset = this.imgs.offset();
+    this.initial.offset.right = this.initial.offset.left + this.imgs.width();
+    this.top_margin = this.left_margin = this.options.margin;
+    this.right_margin = $(document).width() - this.options.margin;
 
     this['setup_' + this.options.animation]();
 
     this.animate(0);
     this.listen();
+  },
+
+  /**
+   *
+   */
+  default_init_angle: function() {
+    var i, r;
+    // Set initial angle
+    for(i=0; i<this.num; i++) {
+      r = Math.floor((Math.random() - 0.5) * this.options.angle_delta);
+      this.initial.angle[i] = r;
+    }
+  },
+
+  /**
+   *
+   */
+  default_init_position: function() {
+    var i;
+    // Set initial x, y
+    for(i=0; i<this.num; i++) {
+      this.initial.x[i] = 0;
+      this.initial.y[i] = 0;
+    }
   },
 
   /**
@@ -136,11 +169,72 @@ $.Controller.extend('ImageStack',
   },
 
   /**
+   * Find linear mean value
+   */
+  linear: function(phase, v0, v1) {
+    return v0 * (1 - phase) + v1 * phase;
+  },
+
+  /**
+   * 
+   */
+  keep_boundaries: function(phase, max_boundaries, transformation) {
+    var i = 0,
+        max_top = max_boundaries['top'] * phase + this.initial.offset['top'],
+        max_left = max_boundaries['left'] * phase + this.initial.offset['left'],
+        max_right = max_boundaries['right'] * phase + this.initial.offset['right'];
+
+    if(max_top < this.top_margin) {
+      for(i=0; i<this.num; i++) {
+        transformation[i].ty = transformation[i].ty -
+          (max_top - this.top_margin) * -1;
+      }
+    }
+    if(max_left < this.left_margin) {
+      for(i=0; i<this.num; i++) {
+        transformation[i].tx = transformation[i].tx -
+          (max_left - this.left_margin);
+      }
+    }
+    if(max_right > this.right_margin) {
+      for(i=0; i<this.num; i++) {
+        transformation[i].tx = transformation[i].tx -
+          (max_right - this.right_margin);
+      }
+    }
+
+    return transformation;
+  },
+
+  /**
+   * Apply the css transformation
+   */
+  transform: function(transformation) {
+    var i;
+    for(i=0; i<this.num; i++) {
+      $(this.imgs[i]).css('transform',
+        'translate(' + transformation[i].tx + 'px, ' +
+                       transformation[i].ty * -1 + 'px) ' +
+        'rotate(' + transformation[i].r + 'deg)'
+      );
+    }
+  },
+
+  /**
    * Semi-circular disposal setup.
    */
   setup_semi_circular: function() {
+    this.A = Math.PI,
+    this.R = this.imgs.height() * this.options.semi_circular.radium,
+    this.max_boundaries =  {
+      'top': -this.R,
+      'left': -this.R,
+      'right': this.R
+    };
+
     // Initialize angle of 1st img with zero.
-    this.initial_angle[0] = 0;
+    this.default_init_angle();
+    this.initial.angle[0] = 0;
 
     // Set initial z-index
     for(i=0; i<this.num; i++) {
@@ -154,19 +248,29 @@ $.Controller.extend('ImageStack',
    * Semi-circular disposal animation.
    */
   animate_semi_circular: function(phase) {
-    var A = Math.PI,
-        R = this.imgs.height() * 1.15,
-        i, tx, ty, r;
+    var self = this,
+        transformation = [],
+        i;
 
-    for(i=1; i<this.num; i++) {
-      r = this.initial_angle[i] * (1 - phase);
-      tx = R * Math.cos( A * (i - 1) / (this.num - 2)) * phase;
-      ty = R * Math.sin( A * (i - 1) / (this.num - 2)) * phase;
-      $(this.imgs[i]).css('transform',
-        'translate(' + tx + 'px, ' + ty*-1 + 'px) ' +
-        'rotate(' + r + 'deg)'
-      );
+    function x(i) {
+      return self.R * Math.cos( self.A * (i - 1) / (self.num - 2));
     }
+
+    function y(i) {
+      return self.R * Math.sin( self.A * (i - 1) / (self.num - 2));
+    }
+
+    transformation[0] = {r: 0, tx:0, ty:0};
+    for(i=1; i<this.num; i++) {
+      transformation[i] = {
+        r: this.linear(phase, this.initial.angle[i], 0),
+        tx: this.linear(phase, 0, x(i)),
+        ty: this.linear(phase, 0, y(i))
+      };
+    }
+    this.transform(
+      this.keep_boundaries(phase, this.max_boundaries, transformation)
+    );
   },
 
   /**
@@ -180,9 +284,18 @@ $.Controller.extend('ImageStack',
     this.grid_spacing = this.options.grid.grid_spacing;     // inter grid spacing
     this.W = this.cols * this.w + (this.cols - 1) * this.grid_spacing; // grid width
     this.H = this.rows * this.h + (this.rows - 1) * this.grid_spacing; // grid height
+    this.max_boundaries =  {
+      'top': -this.H/2 + this.h/2,
+      'left': -this.W/2 + this.w/2,
+      'right': this.W/2 - this.w/2 
+    };
 
     // Initialize angle of 1st img with zero.
-    this.initial_angle[0] = 0;
+    this.default_init_angle();
+    this.initial.angle[0] = 0;
+
+    // Initialize positions.
+    this.default_init_position();
 
     // Set initial z-index
     for(i=0; i<this.num; i++) {
@@ -197,7 +310,8 @@ $.Controller.extend('ImageStack',
    */
   animate_grid: function(phase) {
     var self = this,
-        r, tx, ty;
+        transformation = [],
+        i;
 
     function x(i) {
       var pos = i % self.cols;
@@ -210,14 +324,15 @@ $.Controller.extend('ImageStack',
     }
 
     for(i=0; i<this.num; i++) {
-      r = this.initial_angle[i] * (1 - phase);
-      tx = x(i) * phase;
-      ty = y(i) * phase;
-      $(this.imgs[i]).css('transform',
-        'translate(' + tx + 'px, ' + ty*-1 + 'px) ' +
-        'rotate(' + r + 'deg)'
-      );
+      transformation[i] = {
+        r: this.linear(phase, this.initial.angle[i], 0),
+        tx: this.linear(phase, this.initial.x[i], x(i)),
+        ty: this.linear(phase, this.initial.y[i], y(i))
+      };
     }
+    this.transform(
+      this.keep_boundaries(phase, this.max_boundaries, transformation)
+    );
   }
 }
 );
