@@ -7,10 +7,29 @@ steal.plugins(
 $.Controller.extend('ImageStack',
 /* @static */
 {
+  /**
+   * Default options:
+   * 
+   * animation:                 Animation type.
+   *                            options: 'semi_circular', 'grid'
+   * 
+   * angle_delta:               Initial angle delta (in degrees), default 30.
+   * 
+   * listener_area_mult:        x times of imgs.height
+   * 
+   * grid: {                    Grid specific parameters
+   *   grid_spacing:              in pixels, default 20.
+   *   rows:                      n rows, default 2
+   *}
+   */
   defaults: {
-    animation: 'semi_circular',               // animation type
+    animation: 'grid',                        // animation type
     angle_delta: 30,                          // in degrees
-    listener_area_mult: 2.2                   // x times of imgs.height
+    listener_area_mult: 2.2,                  // x times of imgs.height
+    grid: {                                   // grid specific parameters
+      grid_spacing: 20,                       // in pixels
+      rows: 2                                 // n rows
+    }
   }
 },
 /* @prototype */
@@ -26,7 +45,7 @@ $.Controller.extend('ImageStack',
     this.initial_angle = [];
 
     // Set initial angle
-    for(i=1; i<this.num; i++) {
+    for(i=0; i<this.num; i++) {
       r = Math.floor((Math.random() - 0.5) * this.options.angle_delta);
       this.initial_angle[i] = r;
     }
@@ -68,7 +87,8 @@ $.Controller.extend('ImageStack',
   },
 
   /**
-   *
+   * Proximity function, based on the mouse approximation of the center.
+   * Output: normal_distance, where 0 reached the center, and 1 farthest point.
    */
   proximity: function(ev) {
     var img_side = this.imgs.height(),
@@ -81,7 +101,8 @@ $.Controller.extend('ImageStack',
   },
 
   /**
-   *
+   * Phase function, based on a normalized approximation value:
+   * Output: phase, where phase = [1-0] when normal_distance = [0-1]
    */
   phase: function(normal_distance) {
     var staged_normal_distance;
@@ -118,6 +139,9 @@ $.Controller.extend('ImageStack',
    * Semi-circular disposal setup.
    */
   setup_semi_circular: function() {
+    // Initialize angle of 1st img with zero.
+    this.initial_angle[0] = 0;
+
     // Set initial z-index
     for(i=0; i<this.num; i++) {
       $(this.imgs[i]).css(
@@ -135,9 +159,60 @@ $.Controller.extend('ImageStack',
         i, tx, ty, r;
 
     for(i=1; i<this.num; i++) {
-      r = (this.initial_angle[i] * (1 - phase));
+      r = this.initial_angle[i] * (1 - phase);
       tx = R * Math.cos( A * (i - 1) / (this.num - 2)) * phase;
       ty = R * Math.sin( A * (i - 1) / (this.num - 2)) * phase;
+      $(this.imgs[i]).css('transform',
+        'translate(' + tx + 'px, ' + ty*-1 + 'px) ' +
+        'rotate(' + r + 'deg)'
+      );
+    }
+  },
+
+  /**
+   * Grid disposal setup.
+   */
+  setup_grid: function() {
+    this.rows = this.options.grid.rows;                     // num of rows
+    this.cols = Math.ceil(this.num / this.rows);            // num of cols
+    this.w = this.imgs.width();                             // image width
+    this.h = this.imgs.height();                            // image height
+    this.grid_spacing = this.options.grid.grid_spacing;     // inter grid spacing
+    this.W = this.cols * this.w + (this.cols - 1) * this.grid_spacing; // grid width
+    this.H = this.rows * this.h + (this.rows - 1) * this.grid_spacing; // grid height
+
+    // Initialize angle of 1st img with zero.
+    this.initial_angle[0] = 0;
+
+    // Set initial z-index
+    for(i=0; i<this.num; i++) {
+      $(this.imgs[i]).css(
+        'z-index', (i < this.num / 2 ?  this.num - i : i)
+      );
+    }
+  },
+
+  /**
+   * Grid disposal animation.
+   */
+  animate_grid: function(phase) {
+    var self = this,
+        r, tx, ty;
+
+    function x(i) {
+      var pos = i % self.cols;
+      return -self.W / 2 + (self.w + self.grid_spacing) * pos + self.w / 2;
+    }
+
+    function y(i) {
+      var pos = parseInt(i / self.cols);
+      return self.H / 2 - (self.h + self.grid_spacing) * pos - self.h / 2;
+    }
+
+    for(i=0; i<this.num; i++) {
+      r = this.initial_angle[i] * (1 - phase);
+      tx = x(i) * phase;
+      ty = y(i) * phase;
       $(this.imgs[i]).css('transform',
         'translate(' + tx + 'px, ' + ty*-1 + 'px) ' +
         'rotate(' + r + 'deg)'
