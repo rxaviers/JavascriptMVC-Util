@@ -31,6 +31,7 @@ $.Controller.extend('ImageStack',
    * initial_shadow:            shadow components, initial
    * final_shadow:              shadow components, final
    * 
+   * flying_zindex_incr         increment of z-index when imgs are expanded.
    */
   defaults: {
     animation: 'grid',                        // animation type
@@ -47,7 +48,8 @@ $.Controller.extend('ImageStack',
     initial_shadow: [1,0,3,0],                // shadow components, initial
     final_shadow: [1,1,10,1],                 // shadow components, final
     initial_color: [0,0,0],                   // color components, initial
-    final_color: [0,9,0]                      // color components, final
+    final_color: [0,9,0],                     // color components, final
+    flying_zindex_incr: 100                   // increment of z-index when imgs are expanded
   }
 },
 /* @prototype */
@@ -64,6 +66,7 @@ $.Controller.extend('ImageStack',
     this.initial.y = [];
     this.initial.offset = this.imgs.offset();
     this.initial.offset.right = this.initial.offset.left + this.imgs.width();
+    this.zindex = [];
     this.top_margin = this.left_margin = this.options.margin;
     this.right_margin = $(document).width() - this.options.margin;
     this.height = this.imgs.outerHeight(true);
@@ -77,8 +80,8 @@ $.Controller.extend('ImageStack',
       'width':this.width
     });
 
-    this.animate(0);
     this.listen();
+    this.animate(0);
   },
 
   /**
@@ -108,21 +111,42 @@ $.Controller.extend('ImageStack',
   /**
    *
    */
+  set_zindexes: function(increment) {
+    var i;
+
+    for(i=0; i<this.num; i++) {
+      $(this.imgs[i]).css(
+        'z-index', this.zindex[i] + increment
+      );
+    }
+
+    this.listen_el.css('z-index', this.num + 1 + increment);
+  },
+
+  stationay_zindexes: function() {
+    this.set_zindexes(0);
+  },
+
+  flying_zindexes: function() {
+    this.set_zindexes(this.options.flying_zindex_incr);
+  },
+
+  /**
+   *
+   */
   listen: function() {
     var img_side = this.height,
         mult = this.options.listener_area_mult,
         event_side = img_side * mult,
         self = this;
 
-    this.element.append(
+    this.listen_el = $('<div/>').css({
       // Listener element stands center-aligned and on top of all others.
-      $('<div/>').css({
         'position': 'absolute',
         'width': event_side + 'px',
         'height': event_side + 'px',
         'top': img_side * (-mult + 1)/2 + 'px',
-        'left': img_side * (-mult + 1)/2 + 'px',
-        'z-index': this.num + 1
+        'left': img_side * (-mult + 1)/2 + 'px'
       })
       .mousemove(function(ev) {
         // Figure out the phase by mouse proximity and call animation.
@@ -131,8 +155,24 @@ $.Controller.extend('ImageStack',
       .mouseleave(function(ev) {
         // Call animation with phase = 0.
         self.animate(0);
+      });
+
+    this.element
+      .append(this.listen_el)
+      .bind('collapsed', function(ev) {
+        // Hide the surplus images
+        for(i=3; i<self.num; i++) {
+          $(self.imgs[i]).hide();
+        }
+        self.stationay_zindexes();
       })
-    );
+      .bind('expanded', function(ev) {
+        // Show images
+        self.imgs.show();
+        self.flying_zindexes();
+      });
+
+
   },
 
   /**
@@ -171,14 +211,17 @@ $.Controller.extend('ImageStack',
    * Runs the default and specific animation uppon phase.
    */
   animate: function(phase) {
-    // Hide the surplus images when collapsed
     if(phase < 0.001) {
-      for(i=3; i<this.num; i++) {
-        $(this.imgs[i]).hide();
+      if(!this.state || this.state == 'expanded') {
+        this.element.trigger('collapsed');
+        this.state = 'collapsed';
       }
     }
     else {
-      this.imgs.show();
+      if(this.state == 'collapsed') {
+        this.element.trigger('expanded');
+        this.state = 'expanded';
+      }
     }
 
     this['animate_' + this.options.animation]( phase );
@@ -278,11 +321,9 @@ $.Controller.extend('ImageStack',
     this.default_init_angle();
     this.initial.angle[0] = 0;
 
-    // Set initial z-index
+    // Set z-index'es
     for(i=0; i<this.num; i++) {
-      $(this.imgs[i]).css(
-        'z-index', (i < this.num / 2 ?  this.num - i : i)
-      );
+      this.zindex[i] = (i < this.num / 2 ?  this.num - i : i);
     }
   },
 
@@ -340,11 +381,9 @@ $.Controller.extend('ImageStack',
     // Initialize positions.
     this.default_init_position();
 
-    // Set initial z-index
+    // Set z-index'es
     for(i=0; i<this.num; i++) {
-      $(this.imgs[i]).css(
-        'z-index', (i < this.num / 2 ?  this.num - i : i)
-      );
+      this.zindex[i] = (i < this.num / 2 ?  this.num - i : i);
     }
   },
 
