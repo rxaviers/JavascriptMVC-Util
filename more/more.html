@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Super</title>
+</head>
+<body>
+  <div id="body">
+  </div>
+  <script type='text/javascript' src='../../steal/steal.js?super/more'></script>
+  <script type='text/javascript'>
+    $("#body").more({
+      find: function(callback) {
+        callback('Lorem dorem ipsum et velor');
+      },
+      more: function(data, more_el) {
+        more_el.before($('<p>').html(data));
+      }
+    });
+  </script>
+</body>
+</html>
