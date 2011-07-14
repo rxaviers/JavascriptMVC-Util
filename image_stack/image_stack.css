@@ -1,0 +1,13 @@
+.image_stack {
+  position:relative;
+}
+
+.image_stack img {
+  border:3px solid #bbb;
+  position:absolute;
+  top:0pt;
+  left:0pt;
+  -moz-box-shadow:1px 1px 10px #000;
+  -webkit-box-shadow:1px 1px 10px #000;
+  box-shadow:1px 1px 10px #000;
+}
