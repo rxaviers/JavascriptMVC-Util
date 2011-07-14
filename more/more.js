@@ -4,7 +4,7 @@ steal.plugins(
   'jquery/controller/view')
   .css('more')
   .views(
-    '//super/more/views/init.ejs')
+    '//util/more/views/init.ejs')
   .resources('jquery.inview') // https://github.com/protonet/jquery.inview
   .then(function() {
 
@@ -27,7 +27,7 @@ $.Controller.extend('More',
 
     // Create the 'more' element
     //this.more_el = $(this.view('init'));
-    this.more_el = $( $.View('//super/more/views/init.ejs') );
+    this.more_el = $( $.View('//util/more/views/init.ejs') );
     this.more_el.find('span').html(this.options.more_text);
     this.element.append(this.more_el);
     this.loading = false;

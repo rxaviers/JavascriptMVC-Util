@@ -1,0 +1,31 @@
+From c6fd99ee2ceef65f0199b42feff11334f831636a Mon Sep 17 00:00:00 2001
+From: Rafael Xavier de Souza <rxaviers@gmail.com>
+Date: Tue, 31 May 2011 17:25:56 -0300
+Subject: [PATCH 2/2] Event to bubble up the DOM hierarchy
+
+- Change makes event to bubble up the DOM hierarchy.
+---
+ jquery.hook.js |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/jquery.hook.js b/jquery.hook.js
+index e80d61f..b7f83db 100644
+--- a/jquery.hook.js
++++ b/jquery.hook.js
+@@ -46,10 +46,10 @@
+ 			if ( old && !old.__hookold ) {
+ 				
+ 				$.fn[ method ] = function () {
+-					this.triggerHandler('onbefore'+method);
+-					this.triggerHandler('on'+method);
++					this.trigger('onbefore'+method);
++					this.trigger('on'+method);
+ 					var ret = old.apply(this, arguments);
+-					this.triggerHandler('onafter'+method);
++					this.trigger('onafter'+method);
+ 					return ret;
+ 				};
+ 				
+-- 
+1.7.4.1
+
