@@ -45,7 +45,9 @@ $.Controller.extend('ImageStack',
     },
     margin: 10,                               // in pixels, margin from document
     initial_shadow: [1,0,3,0],                // shadow components, initial
-    final_shadow: [1,1,10,1]                  // shadow components, final
+    final_shadow: [1,1,10,1],                 // shadow components, final
+    initial_color: [0,0,0],                   // color components, initial
+    final_color: [0,9,0]                      // color components, final
   }
 },
 /* @prototype */
@@ -64,8 +66,16 @@ $.Controller.extend('ImageStack',
     this.initial.offset.right = this.initial.offset.left + this.imgs.width();
     this.top_margin = this.left_margin = this.options.margin;
     this.right_margin = $(document).width() - this.options.margin;
+    this.height = this.imgs.outerHeight(true);
+    this.width = this.imgs.outerWidth(true);
 
     this['setup_' + this.options.animation]();
+
+    // Set div container width and height.
+    this.element.css({
+      'height':this.height,
+      'width':this.width
+    });
 
     this.animate(0);
     this.listen();
@@ -99,7 +109,7 @@ $.Controller.extend('ImageStack',
    *
    */
   listen: function() {
-    var img_side = this.imgs.height(),
+    var img_side = this.height,
         mult = this.options.listener_area_mult,
         event_side = img_side * mult,
         self = this;
@@ -130,7 +140,7 @@ $.Controller.extend('ImageStack',
    * Output: normal_distance, where 0 reached the center, and 1 farthest point.
    */
   proximity: function(ev) {
-    var img_side = this.imgs.height(),
+    var img_side = this.height,
         event_side = img_side * this.options.listener_area_mult,
         x = ev.layerX - event_side/2,
         y = ev.layerY - event_side/2,
@@ -175,13 +185,18 @@ $.Controller.extend('ImageStack',
   },
 
   default_shadowing: function(phase) {
-    var shadow = [], i;
+    var shadow = [], color = [], i;
     for(i=0; i<4; i++) {
       shadow.push( this.linear(
         phase, this.options.initial_shadow[i], this.options.final_shadow[i]
       ));
     }
-    this.shadow( shadow.join("px ") + 'px #000' );
+    for(i=0; i<3; i++) {
+      color.push( parseInt(this.linear(
+        phase, this.options.initial_color[i], this.options.final_color[i]
+      ), 16));
+    }
+    this.shadow( shadow.join("px ") + 'px #' + color.join("") );
   },
 
   /**
@@ -252,7 +267,7 @@ $.Controller.extend('ImageStack',
    */
   setup_semi_circular: function() {
     this.A = Math.PI,
-    this.R = this.imgs.height() * this.options.semi_circular.radium,
+    this.R = this.height * this.options.semi_circular.radium,
     this.max_boundaries =  {
       'top': -this.R,
       'left': -this.R,
@@ -307,8 +322,8 @@ $.Controller.extend('ImageStack',
   setup_grid: function() {
     this.rows = this.options.grid.rows;                     // num of rows
     this.cols = Math.ceil(this.num / this.rows);            // num of cols
-    this.w = this.imgs.width();                             // image width
-    this.h = this.imgs.height();                            // image height
+    this.w = this.width;                                    // image width
+    this.h = this.height;                                   // image height
     this.grid_spacing = this.options.grid.grid_spacing;     // inter grid spacing
     this.W = this.cols * this.w + (this.cols - 1) * this.grid_spacing; // grid width
     this.H = this.rows * this.h + (this.rows - 1) * this.grid_spacing; // grid height
