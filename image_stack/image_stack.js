@@ -1,7 +1,7 @@
 steal.plugins(
   'jquery/controller')
   .css('image_stack')
-  .resources('jquery.transform.lite') // https://github.com/lrbabe/jquery.transform.js/blob/master/jquery.transform.lite.js
+  .resources('jquery.transform.light') // https://github.com/lrbabe/jquery.transform.js
   .then(function() {
 
 $.Controller.extend('ImageStack',
@@ -58,6 +58,7 @@ $.Controller.extend('ImageStack',
    *
    */
   init: function(el, options) {
+    var self = this;
     this.imgs = this.find('img');
     this.num = this.imgs.length;
     this.initial = {}
@@ -82,6 +83,10 @@ $.Controller.extend('ImageStack',
 
     this.listen();
     this.animate(0);
+
+    $(window).resize(function() {
+      self['setup_' + self.options.animation]();
+    });
   },
 
   /**
