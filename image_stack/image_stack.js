@@ -9,7 +9,8 @@ $.Controller.extend('ImageStack',
 {
   defaults: {
     animation: 'semi_circular',               // animation type
-    angle_delta: 30                           // in degrees
+    angle_delta: 30,                          // in degrees
+    listener_area_mult: 2.2                   // x times of imgs.height
   }
 },
 /* @prototype */
@@ -41,17 +42,28 @@ $.Controller.extend('ImageStack',
    */
   listen: function() {
     var img_side = this.imgs.height(),
-        event_side = img_side * 3;
+        mult = this.options.listener_area_mult,
+        event_side = img_side * mult,
+        self = this;
 
     this.element.append(
+      // Listener element stands center-aligned and on top of all others.
       $('<div/>').css({
         'position': 'absolute',
         'width': event_side + 'px',
         'height': event_side + 'px',
-        'top': -img_side + 'px',
-        'left': -img_side + 'px',
+        'top': img_side * (-mult + 1)/2 + 'px',
+        'left': img_side * (-mult + 1)/2 + 'px',
         'z-index': this.num + 1
-      }).mousemove(this.callback('animate'))
+      })
+      .mousemove(function(ev) {
+        // Figure out the phase by mouse proximity and call animation.
+        self.animate(self.phase( self.proximity(ev) ));
+      })
+      .mouseleave(function(ev) {
+        // Call animation with phase = 0.
+        self.animate(0);
+      })
     );
   },
 
@@ -60,7 +72,7 @@ $.Controller.extend('ImageStack',
    */
   proximity: function(ev) {
     var img_side = this.imgs.height(),
-        event_side = img_side * 3,
+        event_side = img_side * this.options.listener_area_mult,
         x = ev.layerX - event_side/2,
         y = ev.layerY - event_side/2,
         distance = Math.sqrt(x*x + y*y),
@@ -86,11 +98,9 @@ $.Controller.extend('ImageStack',
   },
 
   /**
-   * Figure out the phase by mouse proximity and call the selected animation type.
+   * Runs the default and specific animation uppon phase.
    */
-  animate: function(ev) {
-    var phase = this.phase( this.proximity(ev) );
-
+  animate: function(phase) {
     // Hide the surplus images when collapsed
     if(phase < 0.001) {
       for(i=3; i<this.num; i++) {
