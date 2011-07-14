@@ -16,6 +16,7 @@ $.Controller.extend('ContentStack',
     listen_to: document.documentElement,
     push_ev: 'push_content',                  // push content event
     pop_ev: 'pop_content',                    // pop content event
+    ready_ev: 'content_ready',                // content ready event
     phaseOut: function(el) {
         return el.hide();
       },
@@ -30,6 +31,7 @@ $.Controller.extend('ContentStack',
    *
    */
   init: function(el, options) {
+    this.content_stats = [];
     $(this.options.listen_to)
       .bind(this.options.push_ev, this.callback('push'))
       .bind(this.options.pop_ev, this.callback('pop'));
@@ -40,18 +42,30 @@ $.Controller.extend('ContentStack',
   /**
    *
    */
-  push: function(ev, content) {
+  push: function(ev, content, stats) {
+    this.content_stats.push(stats);
     this.phaseOut(this.element.children());
     this.element.append(content.hide());
     this.phaseIn(content);
+    this.content_ready();
   },
 
   /**
    *
    */
   pop: function(ev) {
+    this.content_stats.pop();
     this.phaseOut(this.element.children(':last-child')).remove();
     this.phaseIn(this.element.children(':last-child'));
+    this.content_ready();
+  },
+
+  /**
+   *
+   */
+  content_ready: function() {
+    var stats = this.content_stats[this.content_stats.length - 1];
+    this.element.trigger(this.options.ready_ev, [stats]);
   }
 }
 );
