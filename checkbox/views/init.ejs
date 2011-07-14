@@ -1,0 +1,7 @@
+<%if(container_tag){%>
+<<%= container_tag %> class="checkbox">
+<%}%>
+<input type="checkbox"<%= value ? ' value="' + value + '"' : '' %><%= name ? ' name="' + name + '"' : '' %>>
+<%if(container_tag){%>
+</<%= container_tag %>>
+<%}%>
