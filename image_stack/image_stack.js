@@ -27,6 +27,10 @@ $.Controller.extend('ImageStack',
    * }
    *
    * margin:                    in pixels, margin from document
+   * 
+   * initial_shadow:            shadow components, initial
+   * final_shadow:              shadow components, final
+   * 
    */
   defaults: {
     animation: 'grid',                        // animation type
@@ -39,7 +43,9 @@ $.Controller.extend('ImageStack',
       grid_spacing: 20,                       // in pixels
       rows: 2                                 // n rows
     },
-    margin: 10                                // in pixels, margin from document
+    margin: 10,                               // in pixels, margin from document
+    initial_shadow: [1,0,3,0],                // shadow components, initial
+    final_shadow: [1,1,10,1]                  // shadow components, final
   }
 },
 /* @prototype */
@@ -168,6 +174,16 @@ $.Controller.extend('ImageStack',
     this['animate_' + this.options.animation]( phase );
   },
 
+  default_shadowing: function(phase) {
+    var shadow = [], i;
+    for(i=0; i<4; i++) {
+      shadow.push( this.linear(
+        phase, this.options.initial_shadow[i], this.options.final_shadow[i]
+      ));
+    }
+    this.shadow( shadow.join("px ") + 'px #000' );
+  },
+
   /**
    * Find linear mean value
    */
@@ -221,6 +237,17 @@ $.Controller.extend('ImageStack',
   },
 
   /**
+   * 
+   */
+  shadow: function(value) {
+    this.imgs.css({
+      '-moz-box-shadow':value,
+      '-webkit-box-shadow':value,
+      'box-shadow':value
+    });
+  },
+
+  /**
    * Semi-circular disposal setup.
    */
   setup_semi_circular: function() {
@@ -271,6 +298,7 @@ $.Controller.extend('ImageStack',
     this.transform(
       this.keep_boundaries(phase, this.max_boundaries, transformation)
     );
+    this.default_shadowing(phase);
   },
 
   /**
@@ -333,6 +361,7 @@ $.Controller.extend('ImageStack',
     this.transform(
       this.keep_boundaries(phase, this.max_boundaries, transformation)
     );
+    this.default_shadowing(phase);
   }
 }
 );
