@@ -19,8 +19,9 @@ $.Controller.extend('Undo',
 {
   /**
    * @param {Object} options: {
-   *   'do': required A callback function called when timeout is reached.
+   *   ['do']: optional A callback function called when timeout is reached.
    *   ['undo']: optional A callback function called when aborted.
+   *   ['finally']: optional A callback function called anyway after do or undo.
    * }
    */
   init: function(el, options) {
@@ -31,7 +32,7 @@ $.Controller.extend('Undo',
     this.count_el.html(this.count);
 
     // Set undo timeout:
-    this.undoTimeout = window.setTimeout(this.options['do'],
+    this.undoTimeout = window.setTimeout(this.callback('do'),
           this.options.total_time);
 
     // Set counter tick:
@@ -69,6 +70,30 @@ $.Controller.extend('Undo',
   /**
    *
    */
+  'do': function() {
+    if(this.options['do']) {
+      this.options['do']();
+    }
+
+    this['finally'](); 
+  },
+
+  /**
+   *
+   */
+  'finally': function() {
+    this.element.fadeOut('fast', function() {
+      $(this).remove();
+    });
+
+    if(this.options['finally']) {
+      this.options['finally']();
+    }
+  },
+
+  /**
+   *
+   */
   abort: function() {
     window.clearTimeout(this.undoTimeout);
     window.clearTimeout(this.counterTick);
@@ -77,7 +102,7 @@ $.Controller.extend('Undo',
       this.options.undo();
     }
 
-    this.element.remove();
+    this['finally'](); 
   }
 }
 );
