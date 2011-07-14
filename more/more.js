@@ -32,19 +32,8 @@ $.Controller.extend('More',
     this.element.append(this.more_el);
     this.loading = false;
 
-    // Listener: it toggles once when inview, once when "outview".
-    this.more_el.bind('inview', function(ev, is_inview) {
-      if(self.loading) {
-        return;
-      }
-
-      if(is_inview) {
-        self.run();
-      }
-      else {
-        clearTimeout(self.timer);
-      }
-    });
+    // Listener: when inview
+    this.more_el.bind('inview', this.callback('run'));
     this.element.trigger('inviewcheck');
   },
 
@@ -52,7 +41,7 @@ $.Controller.extend('More',
    * 
    */
   run: function() {
-    this.loading = true;
+    this.more_el.unbind('inview');
     this.find(this.callback('more'));
   },
 
@@ -68,7 +57,7 @@ $.Controller.extend('More',
     else {
       this.more_el.before(data);
     }
-    this.loading = false;
+    this.more_el.bind('inview', this.callback('run'));
     this.element.trigger('inviewcheck');
   }
 }
