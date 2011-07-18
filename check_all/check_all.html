@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Util.CheckAll</title>
+</head>
+<body>
+  <div id="body">
+    <button id="check_all" type="button">
+      <input type="checkbox" value="1">All
+    </button>
+    <div id="stats"></div>
+    <ul>
+    <li><input type="checkbox" name="id[]" value="1">Item 1</li>
+    <li><input type="checkbox" name="id[]" value="2">Item 2</li>
+    <li><input type="checkbox" name="id[]" value="3">Item 3</li>
+    <li><input type="checkbox" name="id[]" value="4">Item 4</li>
+    <li><input type="checkbox" name="id[]" value="5">Item 5</li>
+    </ul>
+  </div>
+  <script type='text/javascript' src='../../steal/steal.js?util/check_all'></script>
+  <script type='text/javascript'>
+    $(document).ready(function() {
+      $('#check_all')
+        .bind('check', function(ev, check) {
+          $('ul input[type=checkbox]').attr('checked', check);
+        })
+        .bind('check_all', function() {
+          alert('All items checked!');
+        })
+        .util_check_all({
+          stats_el: $('#stats'),
+          all_count: 2290,
+          checked_count: function() {
+            return $('ul li').length;
+          },
+          all_count_text: 'Select all 2290 items',
+          all_checked_text: 'All 2290 items are selected',
+          checked_count_text: function(n) {
+            return 'All ' + n + ' conversations on this page are selected';
+          },
+          clear_selection_text: 'Clean selection'
+        });
+    });
+  </script>
+</body>
+</html>
