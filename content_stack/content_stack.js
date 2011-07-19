@@ -1,6 +1,6 @@
 steal.plugins(
   'jquery/controller')
-  .css('content_stack')
+  .css()
   .then(function() {
 
 $.Controller.extend('ContentStack',

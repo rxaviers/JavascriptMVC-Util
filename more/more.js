@@ -2,7 +2,7 @@ steal.plugins(
   'jquery/controller',
   'jquery/view/ejs',
   'jquery/controller/view')
-  .css('more')
+  .css()
   .views(
     '//util/more/views/init.ejs')
   .resources('jquery.inview') // https://github.com/protonet/jquery.inview
