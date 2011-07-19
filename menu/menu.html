@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Util.DropDownMenu</title>
+</head>
+<body>
+  <div id="picked">Picked: <span></span></div>
+  <button id="menu" type="button">Menu ▼</button>
+  <p>garbage</p>
+  <p>garbage</p>
+  <p>garbage</p>
+  <p>garbage</p>
+  <p>garbage</p>
+  <script type='text/javascript' src='../../steal/steal.js?util/menu'></script>
+  <script type='text/javascript'>
+    $(document).ready(function() {
+      $('#menu')
+      .bind('menu-created', function(ev, el) {
+        el.css({height:'200px'});
+      })
+      .bind('selected', function(ev, value) {
+        $('#picked span').html(value);
+      })
+      .util_menu({
+        'map': {
+          'Submenu 1': 1,
+          'Submenu 2': 2,
+          'Submenu 3': 3,
+          'Submenu 4': 4,
+          'Submenu 5': 5,
+          'Submenu 6': 6,
+          'Submenu 7': 7,
+          'Submenu 8': 8,
+          'Submenu 9': 9,
+          'Submenu 10 lalala': 10
+        }
+      });
+    });
+  </script>
+</body>
+</html>
