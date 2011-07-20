@@ -30,10 +30,16 @@ $.Controller.extend('Util.Menu',
   init: function(el, options) {
     var self = this,
         active = false,
-        mouse_in;
+        mouse_in = true;
 
     // hack to fix this.view
     window.Util.Menu = {};
+
+    this.onBlur = function(ev) {
+      if(self.active && !mouse_in) {
+        self.hide.call(self);
+      }
+    }
 
     // Menu
 
@@ -46,20 +52,14 @@ $.Controller.extend('Util.Menu',
         mouse_in = false; 
       })
       .click(function(ev) {
-        if(!active) {
-          ev.preventDefault();
-          active = true;
+        ev.preventDefault();
+        if(self.active) {
+          self.hide.call(self);
+        }
+        else {
           self.show.call(self);
         }
       });
-
-    // Outside
-    $(document).click(function(ev) {
-      if(active && !mouse_in) {
-        self.hide.call(self);
-        active = false;
-      }
-    });
   },
 
   /**
@@ -67,7 +67,10 @@ $.Controller.extend('Util.Menu',
    */
   show: function() {
     var self = this;
+    this.active = true;
     this.menu_el = $(this.view('init'));
+
+    $(document).click(this.onBlur);
 
     $.map(this.options.map, function(value, key) {
       self.append.call(self, key, value);
@@ -82,11 +85,13 @@ $.Controller.extend('Util.Menu',
         actualHeight = this.menu_el[0].offsetHeight;
 
     var tp = {top: pos.top + pos.height + this.options.offset, left: pos.left};
+    var maxHeight = $(window).height() - (tp.top - $(window).scrollTop());
 
     this.menu_el
     .css($.extend(tp, {
       'position':'absolute',
       'overflow-x':'hidden', 'overflow-y':'auto',
+      'max-height': maxHeight + 'px',
        display:'block'
     }))
     .menu({
@@ -115,6 +120,10 @@ $.Controller.extend('Util.Menu',
    *
    */
   hide: function() {
+    this.active = false;
+
+    $(document).unbind('click', this.onBlur);
+
     this.menu_el.fadeOut('fast', function() {
       $(this).remove();
     });
@@ -124,6 +133,10 @@ $.Controller.extend('Util.Menu',
    *
    */
   close: function() {
+    this.active = false;
+
+    $(document).unbind('click', this.onBlur);
+
     this.menu_el.remove();
   }
 }
