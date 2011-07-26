@@ -3,7 +3,7 @@ steal.plugins(
   'jquery/view/ejs',
   'jquery/controller/view')
   .views(
-    '//util/check_all/views/check_all.ejs',
+    '//util/check_all/views/checked_all_visible.ejs',
     '//util/check_all/views/checked_all.ejs')
   .then(function() {
 
@@ -18,36 +18,26 @@ $.Controller.extend('Util.CheckAll',
     stats_el: null,
     
     /**
-     * @param {Integer} all_count (optional)
-     * All count number.
+     * @param {Function} all_visible_checked_text (required if stats_el)
+     * Text to let user know that all visible items have been checked.
      */
-    all_count: null,
-    
-    /**
-     * @param {String} all_count_text (optional)
-     * Text to check all items.
-     */
-    all_count_text: null,
-    
-    /**
-     * @param {Integer} all_checked_text (optional)
-     * Text to let user know all items have been checked.
-     */
-    all_checked_text: null,
-    
-    /**
-     * @param {Function} checked_count (required if stats_el)
-     * checked_count is a function that returns the current checked count
-     * number.
-     */
-    checked_count: function() {},
+    all_visible_checked_text: function() {},
 
     /**
-     * @param {Function} checked_count_text (required if stats_el)
-     * Text to let user know how many items have been checked.
+     * @param {Hash} check_all_texts (required if stats_el)
+     * Hash mapping all relations { key : select-all-text }
      */
-    checked_count_text: function() {},
-
+    check_all_texts: {},
+    
+    /**
+     * @param {Function} all_checked_text (optional)
+     * Text to let user know that all existing items (or whatever criteria) have
+     * been checked.
+     * @param {Function} all
+     * The all_checked_text function receives the all-key as 1st argument.
+     */
+    all_checked_text: function(all) {},
+    
     /**
      * @param {String} clear_selection_text (required if stats_el)
      * Text to clear selection.
@@ -63,12 +53,7 @@ $.Controller.extend('Util.CheckAll',
   init: function(el, options) {
     var self = this,
         stats_el = this.options.stats_el,
-        all_count = this.options.all_count,
-        all_count_text = this.options.all_count_text,
-        all_checked_text = this.options.all_checked_text,
-        checked_count = this.options.checked_count,
-        checked_count_text = this.options.checked_count_text,
-        clear_selection_text = this.options.clear_selection_text,
+        o = this.options,
         check_all_checkbox_el;
 
     check_all_checkbox_el = this.element.filter('input[type=checkbox]');
@@ -85,36 +70,42 @@ $.Controller.extend('Util.CheckAll',
           check = !check_all_checkbox_el.attr('checked');
 
       check_all_checkbox_el.attr('checked', check);
-      self.element.triggerHandler('check', [check]);
+      self.element.triggerHandler('check_all_visible', [check]);
 
       if(check) {
-        stats_el.html(self.view('check_all', {
-          all_count: all_count,
-          all_count_text: all_count_text,
-          checked_count: checked_count(),
-          checked_count_text: checked_count_text(checked_count())
+        stats_el.html(self.view('checked_all_visible', {
+          all_visible_checked_text: o.all_visible_checked_text(),
+          check_all_texts: o.check_all_texts
         }));
         function clear(ev) {
           ev.preventDefault();
           check_all_checkbox_el.attr('checked', false);
-          self.element.triggerHandler('check', [false]);
+          self.element.triggerHandler('check_all_visible', [false]);
           stats_el.html('');
           all_param = false;
         }
         stats_el.find('.all').click(function(ev) {
+          var all = $(this).data('all');
           ev.preventDefault();
           stats_el.html(self.view('checked_all', {
-            all_checked_text: all_checked_text,
-            clear_selection_text: clear_selection_text
+            all_checked_text: o.all_checked_text(all),
+            clear_selection_text: o.clear_selection_text
           }));
           stats_el.find('.clear').click(clear);
-          self.element.triggerHandler('check_all');
+          self.element.triggerHandler('check_all', [all]);
         });
         stats_el.show();
       }
       else {
         stats_el.html('');
       }
+    });
+  },
+
+  asyncSet: function(func) {
+    var self = this;
+    func(function(options) {
+      $.extend(self.options, options);
     });
   }
 }

@@ -11,32 +11,46 @@
     <div id="stats"></div>
     <ul>
     <li><input type="checkbox" name="id[]" value="1">Item 1</li>
+    <li><input class="letter" type="checkbox" name="id[]" value="4">Item A</li>
     <li><input type="checkbox" name="id[]" value="2">Item 2</li>
+    <li><input class="letter" type="checkbox" name="id[]" value="5">Item B</li>
     <li><input type="checkbox" name="id[]" value="3">Item 3</li>
-    <li><input type="checkbox" name="id[]" value="4">Item 4</li>
-    <li><input type="checkbox" name="id[]" value="5">Item 5</li>
     </ul>
+    <div>More items...</div>
   </div>
   <script type='text/javascript' src='../../steal/steal.js?util/check_all'></script>
   <script type='text/javascript'>
     $(document).ready(function() {
       $('#check_all')
-        .bind('check', function(ev, check) {
+        .bind('check_all_visible', function(ev, check) {
           $('ul input[type=checkbox]').attr('checked', check);
         })
-        .bind('check_all', function() {
-          alert('All items checked!');
+        .bind('check_all', function(ev, key) {
+          if(key == 'all') {
+            alert('All items checked!');
+          }
+          else if(key == 'letter') {
+            $('ul input[type=checkbox]').attr('checked', false);
+            $('ul input.letter[type=checkbox]').attr('checked', true);
+          }
         })
         .util_check_all({
           stats_el: $('#stats'),
-          all_count: 2290,
-          checked_count: function() {
-            return $('ul li').length;
+          all_visible_checked_text: function() {
+            var n = $('ul li').length;
+            return 'All ' + n + ' items on this page are selected';
           },
-          all_count_text: 'Select all 2290 items',
-          all_checked_text: 'All 2290 items are selected',
-          checked_count_text: function(n) {
-            return 'All ' + n + ' conversations on this page are selected';
+          check_all_texts: {
+            all: 'Select all 2290 items',
+            letter: 'Select all 23 letter items'
+          },
+          all_checked_text: function(key) {
+            if(key == 'all') {
+              return 'All 2290 items are selected';
+            }
+            else if(key == 'letter') {
+              return 'All 23 letter items are selected';
+            }
           },
           clear_selection_text: 'Clean selection'
         });
