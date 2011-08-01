@@ -102,11 +102,8 @@ $.Controller.extend('Util.CheckAll',
     });
   },
 
-  asyncSet: function(func) {
-    var self = this;
-    func(function(options) {
-      $.extend(self.options, options);
-    });
+  setOptions: function(options) {
+    $.extend(this.options, options);
   }
 }
 );
