@@ -12,19 +12,19 @@ $.Controller.extend('Util.CheckAll',
 {
   defaults: {
     /**
-     * @param {jQuery} stats_el (optional)
+     * @param {jQuery} info_el (optional)
      * Element used to show messages.
      */
-    stats_el: null,
+    info_el: null,
     
     /**
-     * @param {Function} all_visible_checked_text (required if stats_el)
+     * @param {Function} all_visible_checked_text (required if info_el)
      * Text to let user know that all visible items have been checked.
      */
     all_visible_checked_text: function() {},
 
     /**
-     * @param {Hash} check_all_texts (required if stats_el)
+     * @param {Hash} check_all_texts (required if info_el)
      * Hash mapping all relations { key : select-all-text }
      */
     check_all_texts: {},
@@ -39,7 +39,7 @@ $.Controller.extend('Util.CheckAll',
     all_checked_text: function(all) {},
     
     /**
-     * @param {String} clear_selection_text (required if stats_el)
+     * @param {String} clear_selection_text (required if info_el)
      * Text to clear selection.
      */
     clear_selection_text: null
@@ -52,7 +52,7 @@ $.Controller.extend('Util.CheckAll',
    */
   init: function(el, options) {
     var self = this,
-        stats_el = this.options.stats_el,
+        info_el = this.options.info_el,
         o = this.options,
         check_all_checkbox_el;
 
@@ -73,7 +73,7 @@ $.Controller.extend('Util.CheckAll',
       self.element.triggerHandler('check_all_visible', [check]);
 
       if(check) {
-        stats_el.html(self.view('checked_all_visible', {
+        info_el.html(self.view('checked_all_visible', {
           all_visible_checked_text: o.all_visible_checked_text(),
           check_all_texts: o.check_all_texts
         }));
@@ -81,23 +81,23 @@ $.Controller.extend('Util.CheckAll',
           ev.preventDefault();
           check_all_checkbox_el.attr('checked', false);
           self.element.triggerHandler('check_all_visible', [false]);
-          stats_el.html('');
+          info_el.html('');
           all_param = false;
         }
-        stats_el.find('.all').click(function(ev) {
+        info_el.find('.all').click(function(ev) {
           var all = $(this).data('all');
           ev.preventDefault();
-          stats_el.html(self.view('checked_all', {
+          info_el.html(self.view('checked_all', {
             all_checked_text: o.all_checked_text(all),
             clear_selection_text: o.clear_selection_text
           }));
-          stats_el.find('.clear').click(clear);
+          info_el.find('.clear').click(clear);
           self.element.triggerHandler('check_all', [all]);
         });
-        stats_el.show();
+        info_el.show();
       }
       else {
-        stats_el.html('');
+        info_el.html('');
       }
     });
   },
