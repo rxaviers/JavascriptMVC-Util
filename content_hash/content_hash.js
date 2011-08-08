@@ -9,9 +9,9 @@ $.Controller.extend('ContentHash',
    * Default options:
    */
   defaults: {
-    set_ev: 'set',                            // set content event
-    show_ev: 'show',                          // show content event
-    ready_ev: 'ready',                        // ready event
+    set_ev: 'hash-set',                       // set content event
+    show_ev: 'hash-show',                     // show content event
+    ready_ev: 'hash-ready',                   // ready event
     phaseOut: function(el) {
         return el.hide();
       },
