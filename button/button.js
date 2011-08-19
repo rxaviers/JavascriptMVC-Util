@@ -13,7 +13,8 @@ $.Controller.extend('Util.Button',
    * 
    */
   defaults: {
-    form: true
+    form: true,
+    type: 'button'
   }
 },
 /* @prototype */
