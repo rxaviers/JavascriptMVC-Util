@@ -94,12 +94,12 @@ $.Controller.extend('Util.Menu',
       'max-height': maxHeight + 'px',
        display:'block'
     }))
-    .menu({
-      selected: function(ev, ui) {
-        self.element.triggerHandler('selected', ui.item.data('value'));
-        self.close.call(self);
-      }
+    .bind('menuselect', function(ev, ui) {
+      ev.preventDefault();
+      self.element.triggerHandler('selected', ui.item.data('value'));
+      self.close.call(self);
     })
+    .menu()
     .appendTo(document.body);
 
     this.element.triggerHandler('menu-created', [this.menu_el]);
