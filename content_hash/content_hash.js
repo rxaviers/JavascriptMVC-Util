@@ -11,13 +11,7 @@ $.Controller.extend('ContentHash',
   defaults: {
     set_ev: 'hash-set',                       // set content event
     show_ev: 'hash-show',                     // show content event
-    ready_ev: 'hash-ready',                   // ready event
-    phaseOut: function(el) {
-        return el.hide();
-      },
-    phaseIn: function(el) {
-        return el.show();
-      }
+    clear_ev: 'hash-clear'                    // clear hash
   }
 },
 /* @prototype */
@@ -27,39 +21,35 @@ $.Controller.extend('ContentHash',
    */
   init: function(el, options) {
     this.content_els = {};
+
     this.element
-    .bind(this.options.set_ev, this.callback('set'))
-    .bind(this.options.show_ev, this.callback('show'));
-    this.phaseIn = this.options.phaseIn;
-    this.phaseOut = this.options.phaseOut;
+      .html('')
+      .bind(this.options.set_ev, this.callback('set'))
+      .bind(this.options.show_ev, this.callback('show'))
+      .bind(this.options.clear_ev, this.callback('clear'));
   },
 
   /**
    *
    */
   set: function(ev, key, el) {
-    if(this.content_els[key]) {
-      this.content_els[key].remove();
-    }
     this.content_els[key] = el;
-    this.element.append(el.hide());
   },
 
   /**
    *
    */
   show: function(ev, key) {
-    this.phaseOut(this.element.children());
-    this.phaseIn(this.content_els[key]);
-    this.content_ready(key);
+    this.element.children().detach();
+    this.element.html(this.content_els[key]);
   },
 
   /**
    *
    */
-  content_ready: function(key) {
-    this.content_els[key]
-    .trigger(this.options.ready_ev);
+  clear: function(ev, key) {
+    this.element.children().detach();
+    this.content_els = {};
   }
 }
 );
