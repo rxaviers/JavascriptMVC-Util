@@ -13,16 +13,10 @@ $.Controller.extend('ContentStack',
    *                            options: 'semi_circular', 'grid'
    */
   defaults: {
-    listen_to: document.documentElement,
+    listen_to: document,
     push_ev: 'push_content',                  // push content event
     pop_ev: 'pop_content',                    // pop content event
-    ready_ev: 'content_ready',                // content ready event
-    phaseOut: function(el) {
-        return el.hide();
-      },
-    phaseIn: function(el) {
-        return el.show();
-      }
+    ready_ev: 'content_ready'                 // content ready event
   }
 },
 /* @prototype */
@@ -31,22 +25,23 @@ $.Controller.extend('ContentStack',
    *
    */
   init: function(el, options) {
+    this.content_els = [];
     this.content_stats = [];
+
     $(this.options.listen_to)
       .bind(this.options.push_ev, this.callback('push'))
       .bind(this.options.pop_ev, this.callback('pop'));
-    this.phaseIn = this.options.phaseIn;
-    this.phaseOut = this.options.phaseOut;
   },
 
   /**
    *
    */
   push: function(ev, content, stats) {
+    this.content_els.push(content);
     this.content_stats.push(stats);
-    this.phaseOut(this.element.children());
-    this.element.append(content.hide());
-    this.phaseIn(content);
+
+    this.element.html(content);
+
     this.content_ready();
   },
 
@@ -54,9 +49,11 @@ $.Controller.extend('ContentStack',
    *
    */
   pop: function(ev) {
+    this.content_els.pop();
     this.content_stats.pop();
-    this.phaseOut(this.element.children(':last-child')).remove();
-    this.phaseIn(this.element.children(':last-child'));
+
+    this.element.html(this.content_els[this.content_els.length - 1]);
+
     this.content_ready();
   },
 
@@ -65,8 +62,7 @@ $.Controller.extend('ContentStack',
    */
   content_ready: function() {
     var stats = this.content_stats[this.content_stats.length - 1];
-    this.element.children(':last-child')
-      .trigger(this.options.ready_ev, [stats]);
+    this.element.trigger(this.options.ready_ev, [stats]);
   }
 }
 );
