@@ -29,6 +29,7 @@ $.Controller.extend('ContentStack',
     this.content_stats = [];
 
     $(this.options.listen_to)
+      .html('')
       .bind(this.options.push_ev, this.callback('push'))
       .bind(this.options.pop_ev, this.callback('pop'));
   },
@@ -40,6 +41,7 @@ $.Controller.extend('ContentStack',
     this.content_els.push(content);
     this.content_stats.push(stats);
 
+    this.element.children().detach();
     this.element.html(content);
 
     this.content_ready();
