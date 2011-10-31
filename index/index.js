@@ -1,9 +1,7 @@
-steal.plugins(
-  'jquery/controller',
-  'util/index/infinite_scroll')
-  .css()
-  .views()
-  .then(function() {
+steal(
+'jquery/controller',
+'util/index/infinite_scroll',
+function() {
 
 $.Controller.extend('Util.Index',
 /* @static */
