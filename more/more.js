@@ -1,16 +1,16 @@
-steal.plugins(
-  'jquery/controller',
-  'jquery/view/ejs',
-  'jquery/controller/view')
-  .css()
-  .views(
-    '//util/more/views/init.ejs')
-  .resources('jquery.inview') // https://github.com/protonet/jquery.inview
-  .then(function() {
+steal(
+'jquery/controller',
+'jquery/view/ejs',
+'jquery/controller/view',
+'./resources/jquery.inview.js') // https://github.com/protonet/jquery.inview
+.then(
+'./views/init.ejs',
+function() {
 
-$.Controller.extend('More',
+$.Controller.extend('Util.More',
 /* @static */
 {
+  pluginName: 'more',
   defaults: {
     find: false,                                    // Required.
     more_text: 'More...'
@@ -26,8 +26,7 @@ $.Controller.extend('More',
     this.find = this.options.find;
 
     // Create the 'more' element
-    //this.more_el = $(this.view('init'));
-    this.more_el = $( $.View('//util/more/views/init.ejs') );
+    this.more_el = $(this.view('init'));
     this.more_el.find('span').html(this.options.more_text);
     this.element.append(this.more_el);
     this.loading = false;
