@@ -1,8 +1,6 @@
-steal.plugins(
-  'jquery/controller')
-  .css()
-  .views()
-  .then(function() {
+steal(
+'jquery/controller',
+function() {
 
 $.Controller.extend('Util.Resetable',
 /* @static */
