@@ -36,13 +36,11 @@ $.Controller.extend('Util.Index.InfiniteTail',
         self.options.find(tail_id, callback);
       })
       .bind(this.options.bind.more, function(ev, items) {
-        var stats = items.pop(),
-            more = stats.more;
-
-        self.element.triggerHandler(self.options.trigger.insertion, [items]);
-
-        tail_id = items[items.length-1][self.options.id];
-        return more;
+        if(items.length > 0) {
+          self.element.triggerHandler(self.options.trigger.insertion, [items]);
+          tail_id = items[items.length-1][self.options.id];
+        }
+        return items.length > 0;
       });
   }
 }
